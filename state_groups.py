@@ -26,3 +26,9 @@ class PaymentStatesGroup(StatesGroup):
     receipt = State()
     transaction = State()
     github_request = State()
+
+
+class PromoStatesGroup(StatesGroup):
+    promo = State()
+    discount = State()
+    quantity = State()

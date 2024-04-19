@@ -1,7 +1,7 @@
 # IMPORT ----- IMPORT ----- IMPORT ----- IMPORT ----- IMPORT ----- IMPORT ----- IMPORT ----- IMPORT ----- IMPORT ----- I
 import sqlite3 as sq
 
-from aiogram.types import InlineKeyboardMarkup,  InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # название Базы Данных
 db_name = "DB_CRYPTOFIL.db"
@@ -19,12 +19,12 @@ class DataBase:
 
     def __init__(self):
         pass
+
     # создание табличек Базы Данных
     with sq.connect(db_name) as con:
         cur = con.cursor()
         cur.execute("""CREATE TABLE IF NOT EXISTS users (
-            indexx INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
+            user_id TEXT PRIMARY KEY,
             name TEXT,
             refer_id TEXT
             )""")
@@ -49,26 +49,40 @@ class DataBase:
                         user_github TEXT,
                         soft_name TEXT,
                         soft_price INTEGER,
-                        refer_id INTEGER,
-                        refer_discount INTEGER,
-                        promocode TEXT,
+                        promo TEXT,
                         discount INTEGER,
-                        total_discount INTEGER,
-                        purchased INTEGER
+                        transaction_hash TEXT,
+                        purchased REAL,
+                        refer_code TEXT,
+                        status TEXT,
+                        data_time TEXT
                         )""")
+        cur.execute("""CREATE TABLE IF NOT EXISTS promos (
+                    promo TEXT PRIMARY KEY,
+                    discount REAL,
+                    quantity INTEGER
+                    )""")
+
+    # добавление промокода в базу данных
+    def add_promo(self, promo: str, discount: int, quantity: int):
+        edit_database(f"INSERT INTO promos ('promo', 'discount', 'quantity') VALUES ('{promo}', {discount}, {quantity})")
+
+    # удаление промокода из базы данных
+    def del_promo(self, name:str):
+        edit_database(f"DELETE FROM promos WHERE promo = '{name}'")
 
     # добавление данных о совершенной покупке
-    def addpurchase(self, user_id: int, username: str, user_github: str, soft_name: str, soft_price: float,
-                    refer_id: int, refer_discount: int, promocode: str, discount: int,
-                    total_discount: int, purchased: int):
+    def add_purchase(self, user_id: int, username: str, user_github: str, soft_name: str, soft_price: float,
+                     promo: str, discount: int, purchased: int, transaction_hash: str, refer_code: str, status: str, data_time: str):
         edit_database(f"INSERT INTO purchases ('user_id', 'username', 'user_github', 'soft_name', 'soft_price', "
-                      f"'refer_id', 'refer_discount', 'promocode', 'discount', 'total_discount', 'purchased') VALUES "
-                      f"('{user_id}', '{username}', '{user_github}', '{soft_name}', '{soft_price}', '{refer_id}', "
-                      f"'{refer_discount}', '{promocode}', '{discount}', '{total_discount}', '{purchased}')")
+                      f"'promo', 'discount', 'purchased', 'transaction_hash', 'refer_code', 'status', 'data_time') VALUES "
+                      f"('{user_id}', '{username}', '{user_github}', '{soft_name}', '{soft_price}', '{promo}', "
+                      f"'{discount}', '{purchased}', '{transaction_hash}', '{refer_code}', '{status}', '{data_time}')")
 
     # добавление нового пользователя в Базу Данных
     def adduser(self, user_id: int, name: str, message):
-        edit_database(f"INSERT INTO users('user_id', 'name', 'refer_id') VALUES({user_id}, '{name}', '{message.text[7::]}')")
+        edit_database(
+            f"INSERT INTO users('user_id', 'name', 'refer_id') VALUES({user_id}, '{name}', '{message.text[7::]}')")
 
     # добавление нового софта в Базу Данных
     def addsoft(self, name: str, desc: str, price: float):
@@ -80,7 +94,8 @@ class DataBase:
 
     # добавление нового партнера в Базу Данных
     def addpartner(self, user_id: int, name: str, promocode: str, discount: int, quantity: int):
-        edit_database(f"INSERT INTO partners('user_id', 'name', 'promocode', 'discount', 'quantity') VALUES('{user_id}', '{name}', '{promocode}', '{discount}', '{quantity}')")
+        edit_database(
+            f"INSERT INTO partners('user_id', 'name', 'promocode', 'discount', 'quantity') VALUES('{user_id}', '{name}', '{promocode}', '{discount}', '{quantity}')")
 
     # удаление партнера из Базы Данных
     def delpartner(self, user_id: int):
@@ -88,12 +103,55 @@ class DataBase:
 
     # извлечение информации из Базы Данных о выбранном софте
     def select_software_info(self, name: str):
-        with sq.connect("DB_CRYPTOFIL.db") as con:
+        with sq.connect(db_name) as con:
             cur = con.cursor()
             cur.execute(f"SELECT name, description, price FROM software WHERE name = '{name}'")
             rows = cur.fetchall()
             return rows
 
+    def select_refer_code(self, user_id):
+        with sq.connect(db_name) as con:
+            cur = con.cursor()
+            cur.execute(f"SELECT refer_id FROM users WHERE user_id = '{user_id}'")
+            row = cur.fetchone()
+            return row
 
+    def select_promo(self, promo):
+        with sq.connect(db_name) as con:
+            cur = con.cursor()
+            cur.execute(f"SELECT promo, discount, quantity FROM promos WHERE promo = {promo}")
+            row = cur.fetchone()
+            return row
 
+    def select_promos(self, all=False):
+        with sq.connect(db_name) as con:
+            cur = con.cursor()
+            cur.execute("SELECT promo, discount, quantity FROM promos")
+            rows = cur.fetchall()
+            if all:
+                return rows
+            else:
+                promos_list = []
+                for i in range(len(rows)):
+                    promos_list.append(rows[i][0])
+                return promos_list
 
+    def select_promo_discount(self, promo):
+        with sq.connect(db_name) as con:
+            cur = con.cursor()
+            cur.execute(f"SELECT discount FROM promos WHERE promo = '{promo}'")
+            row = cur.fetchone()
+            return float(row[0])
+
+    def select_promo_quantity(self, promo):
+        with sq.connect(db_name) as con:
+            cur = con.cursor()
+            cur.execute(f"SELECT quantity FROM promos WHERE promo = '{promo}'")
+            row = cur.fetchone()
+            return float(row[0])
+
+    def edit_promo_quantity_minus_one(self, promo, qty):
+        with sq.connect(db_name) as con:
+            cur = con.cursor()
+
+            cur.execute(f"UPDATE promos SET quantity = '{qty}' - 1 WHERE promo = '{promo}'")

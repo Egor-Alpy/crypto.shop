@@ -16,7 +16,7 @@ from foundation.keyboards import *
 
 # SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ---
 # ADD + + + + + + + + ADD + + + + + + + + + ADD + + + + + + + + ADD + + + + + + + + + ADD + + + + + + + + ADD + + + + +
-@dp.message_handler(commands=['addsoft'], state=None)
+'''@dp.message_handler(commands=['addsoft'], state=None)
 async def add_soft(message: types.Message):
     if message.from_user.id in admin_id:
         await ClientStatesGroup.name.set()
@@ -24,7 +24,7 @@ async def add_soft(message: types.Message):
                              parse_mode='markdown',
                              reply_markup=cancel_markup)
     else:
-        await message.reply(MSG['RUS']['ERROR']['NO_ROOTS'], parse_mode='markdown')
+        await message.reply(MSG['RUS']['ERROR']['NO_ROOTS'], parse_mode='markdown')'''
 
 
 @dp.message_handler(lambda message: message.text, state=ClientStatesGroup.name)
@@ -57,19 +57,19 @@ async def load_price(message: types.Message, state: FSMContext):
 
 # SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ----- SOFT ---
 # DEL + + + + + + + + DEL + + + + + + + + + DEL + + + + + + + + DEL + + + + + + + + + DEL + + + + + + + + DEL + + + + +
-@dp.message_handler(commands=['delsoft'], state=None)
+'''@dp.message_handler(commands=['delsoft'], state=None)
 async def delete_soft(message: types.Message):
     if message.from_user.id in admin_id:
         await message.answer(MSG['RUS']['SOFT']['DEL'],
                              parse_mode='markdown',
                              reply_markup=get_softs_inlinekeyboard_4delete())
     else:
-        await message.reply(MSG['RUS']['ERROR']['NO_ROOTS'], parse_mode='markdown')
+        await message.reply(MSG['RUS']['ERROR']['NO_ROOTS'], parse_mode='markdown')'''
 
 
 # PARTNER ----- PARTNER ----- PARTNER ----- PARTNER ----- PARTNER ----- PARTNER ----- PARTNER ----- PARTNER ----- PART
 # ADD + + + + + + + + ADD + + + + + + + + + ADD + + + + + + + + ADD + + + + + + + + + ADD + + + + + + + + ADD + + + + +
-@dp.message_handler(commands=['addpartner'])
+'''@dp.message_handler(commands=['addpartner'])
 async def add_partner(message: types.Message):
     if message.from_user.id in admin_id:
         await PartnerStatesGroup.user_id.set()
@@ -77,7 +77,7 @@ async def add_partner(message: types.Message):
                              parse_mode='markdown',
                              reply_markup=cancel_markup)
     else:
-        await message.reply(MSG['RUS']['ERROR']['NO_ROOTS'], parse_mode='markdown')
+        await message.reply(MSG['RUS']['ERROR']['NO_ROOTS'], parse_mode='markdown')'''
 
 
 @dp.message_handler(lambda message: message.text, state=PartnerStatesGroup.user_id)
@@ -123,7 +123,6 @@ async def load_quantity(message: types.Message, state: FSMContext):
     if is_number(message.text):
         async with state.proxy() as data:
             data['quantity'] = message.text
-        temporary_storage = data['user_id'], data['name'], data['promocode'], data['discount'], data['quantity']
         data_base.addpartner(data['user_id'], data['name'], data['promocode'], data['discount'], data['quantity'])
         await state.finish()
         await message.reply(MSG['RUS']['DATA_BASE'], parse_mode='markdown')
@@ -132,11 +131,64 @@ async def load_quantity(message: types.Message, state: FSMContext):
 
 
 # DELETE * DELETE * DELETE * DELETE * DELETE * DELETE * DELETE * DELETE * DELETE
-@dp.message_handler(commands=['delpartner'], state=None)
+'''@dp.message_handler(commands=['delpartner'], state=None)
 async def delete_partner(message: types.Message):
     if message.from_user.id in admin_id:
         await message.answer(MSG['RUS']['PARTNER']['DEL'],
                              parse_mode='markdown',
                              reply_markup=get_partners_inlinekeyboard_4delete())
     else:
-        await message.reply(MSG['RUS']['ERROR']['NO_ROOTS'], parse_mode='markdown')
+        await message.reply(MSG['RUS']['ERROR']['NO_ROOTS'], parse_mode='markdown')'''
+
+
+# PROMO ----- PROMO ----- PROMO ----- PROMO ----- PROMO ----- PROMO ----- PROMO ----- PROMO ----- PROMO ----- PROMO ----
+# ADD + + + + + + + + ADD + + + + + + + + + ADD + + + + + + + + ADD + + + + + + + + + ADD + + + + + + + + ADD + + + + +
+'''@dp.message_handler(commands=['addpromo'])
+async def add_promo(message: types.Message):
+    if message.from_user.id in admin_id:
+        await PromoStatesGroup.promo.set()
+        await message.answer(MSG['RUS']['PROMO']['ADD']['NAME'],
+                             parse_mode='markdown',
+                             reply_markup=cancel_markup)
+    else:
+        await message.reply(MSG['RUS']['ERROR']['NO_ROOTS'], parse_mode='markdown')'''
+
+
+@dp.message_handler(lambda message: message.text, state=PromoStatesGroup.promo)
+async def load_promo_name(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['name'] = message.text
+    await PromoStatesGroup.discount.set()
+    await message.reply(MSG['RUS']['PROMO']['ADD']['DISCOUNT'], reply_markup=cancel_markup, parse_mode='markdown')
+
+
+@dp.message_handler(lambda message: message.text, state=PromoStatesGroup.discount)
+async def load_promo_discount(message: types.Message, state: FSMContext):
+    if is_number(message.text):
+        async with state.proxy() as data:
+            data['discount'] = float(message.text)
+        await PromoStatesGroup.quantity.set()
+        await message.reply(MSG['RUS']['PROMO']['ADD']['QUANTITY'], reply_markup=cancel_markup, parse_mode='markdown')
+    else:
+        await message.reply(MSG['RUS']['ERROR']['INCORRECT_INPUT'], parse_mode='Markdown')
+
+
+@dp.message_handler(lambda message: message.text, state=PromoStatesGroup.quantity)
+async def load_promo_quantity(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['quantity'] = int(message.text)
+    await message.reply(MSG['RUS']['DATA_BASE'], parse_mode='markdown')
+    data_base.add_promo(data['name'], data['discount'], data['quantity'])
+    await state.finish()
+
+
+# PROMO ----- PROMO ----- PROMO ----- PROMO ----- PROMO ----- PROMO ----- PROMO ----- PROMO ----- PROMO ----- PROMO ----
+# DELETE * DELETE * DELETE * DELETE * DELETE * DELETE * DELETE * DELETE * DELETE
+'''@dp.message_handler(commands=['delpromo'], state=None)
+async def delete_promo(message: types.Message):
+    if message.from_user.id in admin_id:
+        await message.answer(MSG['RUS']['PROMO']['DEL'],
+                             parse_mode='markdown',
+                             reply_markup=get_promo_inlinekeyboard_4delete())
+    else:
+        await message.reply(MSG['RUS']['ERROR']['NO_ROOTS'], parse_mode='markdown')'''

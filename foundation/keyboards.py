@@ -7,7 +7,6 @@ from data_project.data_base import *
 from bot_creation import *
 from data_project.text import MSG
 
-
 # Кнопка отмены машины состояния
 cancel_markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 b1 = KeyboardButton('/cancel')
@@ -63,3 +62,22 @@ def get_partners_inlinekeyboard_4delete():
 async def admin_info_keyboard(callback: types.CallbackQuery):
     data_base.delpartner(callback.data[14:])
     await callback.message.edit_reply_markup(reply_markup=get_partners_inlinekeyboard_4delete())
+
+
+# Клавиатура удаления промокодов
+def get_promo_inlinekeyboard_4delete():
+    with sq.connect(db_name) as con:
+        cur = con.cursor()
+        cur.execute("SELECT promo, discount, quantity FROM promos")
+        rows = cur.fetchall()
+        promo_markup = InlineKeyboardMarkup()
+        for i in range(len(rows)):
+            promo_markup.add(InlineKeyboardButton(f"promo: {rows[i][0]}|discount: {rows[i][1]}|qty: {rows[i][2]}",
+                                                  callback_data='DELETE_PROMO' + str(rows[i][0])))
+        return promo_markup
+
+
+@dp.callback_query_handler(lambda call: call.data.startswith('DELETE_PROMO'))
+async def admin_info_keyboard_promo(callback: types.CallbackQuery):
+    data_base.del_promo(callback.data[12:])
+    await callback.message.edit_reply_markup(reply_markup=get_promo_inlinekeyboard_4delete())
