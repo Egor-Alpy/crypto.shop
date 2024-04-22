@@ -10,6 +10,23 @@ from aiogram import executor
 from foundation.unifier import *
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # ON_STARTUP ----- ON_STARTUP ----- ON_STARTUP ----- ON_STARTUP ---
 async def on_startup(_):
     print('==================\n [BOT IS RUNNING]\n==================')

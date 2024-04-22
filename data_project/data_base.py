@@ -155,3 +155,13 @@ class DataBase:
             cur = con.cursor()
 
             cur.execute(f"UPDATE promos SET quantity = '{qty}' - 1 WHERE promo = '{promo}'")
+
+    def select_tx_hashes(self):
+        with sq.connect(db_name) as con:
+            cur = con.cursor()
+            cur.execute(f"SELECT transaction_hash FROM purchases WHERE status = 1")
+            rows_tuples = cur.fetchall()
+            rows = []
+            for i in range(len(rows_tuples)):
+                rows.append(rows_tuples[i][0])
+            return rows

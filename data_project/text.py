@@ -1,3 +1,5 @@
+USDT_CONTRACT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+RECEIVER = '0xE854c681D8c84e52E125Ac79458A2Acd3ab06aC8'.lower()  # const |||||||||||| .lower() ????????
 
 CANCEL_CMDS = ['start', 'menu', 'addsoft', 'addpartner', 'delsoft', 'delpartner', 'cancel', 'addpromo', 'delpromo']
 

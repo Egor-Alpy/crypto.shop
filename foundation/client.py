@@ -52,26 +52,3 @@ async def menu_soft_func(callback: types.CallbackQuery):
 @dp.callback_query_handler(lambda call: call.data.startswith('menu_request'))
 async def menu_soft_func(callback: types.CallbackQuery):
     await get_menu(message_id=callback.message.message_id, user_id=callback.message.chat.id)
-
-
-# PURCHASE CHECK ----- PURCHASE CHECK ----- PURCHASE CHECK ----- PURCHASE CHECK ----- PURCHASE CHECK ----- PURCHASE CHEC
-'''@dp.message_handler(commands=['pur'])
-async def pur(messagee: types.Message):
-    from web3 import Web3
-    from web3.types import HexStr
-    contract_adress_usdt = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
-    tx_hash = '0xd3a08bbe68b8949ea43a76b5720914dcdaebc2b47b69d006af976aa84d5c9752'
-    con_web3 = Web3(provider=Web3.HTTPProvider(endpoint_uri='https://rpc.ankr.com/eth'))
-    tx_hash = HexStr(tx_hash)
-    tx_data = con_web3.eth.wait_for_transaction_receipt(transaction_hash=tx_hash, timeout=1000)
-    tx_exists = tx_data['status']
-    tx_contract = tx_data['to']
-    tx_receiver = '' # !? !? !? !? !? !? !? !? !? !? !? !
-    tx_coins_qty = tx_data['logs']
-
-    await bot.send_message(messagee.chat.id, data)
-    await bot.send_message(messagee.chat.id, data['status'])
-
-
-'''
-
