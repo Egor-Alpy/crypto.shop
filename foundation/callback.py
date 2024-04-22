@@ -261,6 +261,9 @@ async def transaction_check(message: types.Message, state: FSMContext):
                                    promo=promo, discount=discount,
                                    purchased=purchased, transaction_hash=transaction_hash, refer_code=refer_code,
                                    status=status, data_time=time)
+    except ValueError:
+        await bot.edit_message_text(message_id=message.message_id+1, chat_id=message.chat.id, text='❌')
+        await bot.send_message(chat_id=message.chat.id, text='*🔸 Некорректный адрес контракта*', parse_mode='markdown', reply_markup=transaction_markup)
     except:
         await bot.edit_message_text(message_id=message.message_id+1, chat_id=message.chat.id, text='🛂')
         await bot.send_message(chat_id=message.chat.id, text='*Ошибка проверки транзакции в блокчейне: транзакция'
